@@ -65,19 +65,12 @@ const Step1_TripDetails: React.FC<Props> = ({ data, update }) => {
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <Car size={100} />
           </div>
-          <div className="relative z-10 space-y-3">
+          <div className="relative z-10 space-y-2">
             <div className="flex justify-between items-start">
               <div className="flex flex-col gap-1">
                 <span className="bg-blue-500/20 text-blue-200 border border-blue-500/30 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider inline-flex w-fit">
                   Included Service
                 </span>
-                <button
-                  type="button"
-                  onClick={() => detailsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                  className="text-[11px] text-white/80 underline underline-offset-4 decoration-white/40 hover:text-white transition-colors w-fit"
-                >
-                  More details
-                </button>
               </div>
               <div className="text-right leading-tight">
                 <div className="text-2xl font-bold text-white">${coreService.price}</div>
@@ -95,7 +88,7 @@ const Step1_TripDetails: React.FC<Props> = ({ data, update }) => {
                 More details
               </button>
             </p>
-            <div className="grid grid-cols-2 gap-3 mt-3">
+            <div className="grid grid-cols-2 gap-3 mt-2">
               {coreFeatures.map((item, i) => {
                 const highlight = i < 6;
                 return (
