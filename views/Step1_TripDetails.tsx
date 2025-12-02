@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Calendar, Anchor, Ship, Info, Car, Languages, ShieldCheck, BadgeCheck, Shield, Wallet, Users, Wifi, Martini, Infinity, MessageSquare } from 'lucide-react';
+import { Calendar, Anchor, Ship, Info, Car, Languages, ShieldCheck, BadgeCheck, Shield, Wallet, Users, Wifi, Martini, Infinity, MessageSquare, X } from 'lucide-react';
 import { BookingState, PORTS } from '../types';
 
 interface Props {
@@ -11,6 +11,8 @@ const Step1_TripDetails: React.FC<Props> = ({ data, update }) => {
   const coreService = data.services.find(s => s.id === 'core-8h');
   const detailsRef = useRef<HTMLDivElement | null>(null);
   const [openDetail, setOpenDetail] = useState<number | null>(null);
+  const [showDateModal, setShowDateModal] = useState(false);
+  const [tempDate, setTempDate] = useState(data.date);
   const coreFeatures = [
     { label: 'Private Business Van', icon: Car },
     { label: 'Bilingual Escort & Translation', icon: Languages },
@@ -118,12 +120,17 @@ const Step1_TripDetails: React.FC<Props> = ({ data, update }) => {
           <Calendar size={16} className="text-blue-600" />
           Disembark Time
         </label>
-        <input
-          type="datetime-local"
-          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-          value={data.date}
-          onChange={(e) => update({ date: e.target.value })}
-        />
+        <button
+          type="button"
+          onClick={() => {
+            setTempDate(data.date);
+            setShowDateModal(true);
+          }}
+          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-left text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+        >
+          {data.date ? new Date(data.date).toLocaleString() : 'Select date & time'}
+        </button>
+        <p className="text-[11px] text-slate-400">Tap to choose date and time.</p>
       </div>
 
       {/* Port Selection */}
@@ -228,8 +235,80 @@ const Step1_TripDetails: React.FC<Props> = ({ data, update }) => {
         </div>
       </div>
 
+      {showDateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-5 space-y-4 animate-fadeIn">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-slate-900">Select Date & Time</h3>
+              <button onClick={() => setShowDateModal(false)} className="text-slate-400 hover:text-slate-700">
+                <X size={18} />
+              </button>
+            </div>
+            {(() => {
+              const [dPart, tPartRaw = ''] = (tempDate || '').split('T');
+              const tPart = tPartRaw.split('.')[0]; // strip milliseconds if any
+              const onSave = () => {
+                if (dPart && tPart) {
+                  update({ date: `${dPart}T${tPart}` });
+                } else if (dPart) {
+                  update({ date: `${dPart}T00:00` });
+                } else {
+                  update({ date: '' });
+                }
+                setShowDateModal(false);
+              };
+              return (
+                <>
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <label className="text-sm font-semibold text-slate-700">Date</label>
+                      <input
+                        type="date"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        value={dPart || ''}
+                        onChange={(e) => setTempDate(`${e.target.value || ''}${tPart ? `T${tPart}` : ''}`)}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm font-semibold text-slate-700">Time</label>
+                      <input
+                        type="time"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        value={tPart || ''}
+                        onChange={(e) => setTempDate(`${dPart || ''}${e.target.value ? `T${e.target.value}` : ''}`)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowDateModal(false)}
+                      className="flex-1 h-11 rounded-xl border border-slate-200 text-slate-700 font-semibold"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onSave}
+                      className="flex-1 h-11 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default Step1_TripDetails;
+
+// Modal markup
+(() => null);
+
+// Date/Time Modal
+/* Inline component at end of file */
