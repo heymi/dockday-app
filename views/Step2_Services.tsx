@@ -211,8 +211,8 @@ const Step2_Services: React.FC<Props> = ({ data, update }) => {
             <img src={service.image} alt={service.title} className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 space-y-2">
-            <div className="flex justify-between items-start gap-3">
-              <div className="min-w-0">
+            <div className="grid grid-cols-[minmax(0,1fr)_88px] items-start gap-3">
+              <div className="min-w-0 flex-1">
                 {condensedChips.length > 0 && (
                   <div className="flex flex-wrap items-center gap-2">
                     {condensedChips.map(chip => (
@@ -235,21 +235,22 @@ const Step2_Services: React.FC<Props> = ({ data, update }) => {
                     overflow: 'hidden',
                     lineHeight: '1.4',
                     maxHeight: '2.8em',
-                    wordBreak: 'break-word'
+                    wordBreak: 'break-word',
+                    maxWidth: '100%'
                   }}
                 >
                   {service.description}
                 </p>
               </div>
-              <div className="text-right shrink-0 flex flex-col items-end gap-1">
-                <div className={`text-lg font-bold ${priceColor}`}>${displayPrice.toFixed(2)}</div>
+              <div className="text-right flex flex-col items-end gap-1 w-full">
+                <div className={`text-base font-bold ${priceColor} leading-tight whitespace-nowrap max-w-full truncate`}>${displayPrice.toFixed(2)}</div>
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     openDetails(service);
                   }}
-                  className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-300 transition"
+                  className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-300 transition"
                   aria-label="View details"
                 >
                   <ChevronIcon size={14} />
@@ -298,8 +299,8 @@ const Step2_Services: React.FC<Props> = ({ data, update }) => {
 
       {/* Detail Modal */}
       {detailService && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm px-3 py-6 overflow-y-auto">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[78vh] overflow-hidden animate-fadeIn my-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/70 backdrop-blur-sm px-3 pt-6 pb-28 sm:pb-6 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[72vh] sm:max-h-[78vh] overflow-hidden animate-fadeIn">
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
               <h3 className="text-base font-semibold text-slate-900">Service Details</h3>
               <button onClick={closeDetails} className="p-1 text-slate-500 hover:text-slate-700">
