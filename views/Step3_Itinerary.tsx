@@ -39,44 +39,27 @@ const Step3_Itinerary: React.FC<Props> = ({ data, update }) => {
         <p className="text-slate-500 text-sm">Select destinations to build your perfect day out.</p>
       </div>
 
-      {/* Progress/Budget + Category Filters */}
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 sticky top-[70px] z-30 space-y-3">
-        <div>
-          <div className="flex justify-between items-end mb-2">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Time Budget</span>
-              <span className="text-sm font-bold text-blue-600">{totalHours}h <span className="text-slate-400 font-normal">/ 8h used</span></span>
-          </div>
-          <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-              <div 
-                  className={`h-full rounded-full transition-all duration-500 ${totalHours > 8 ? 'bg-red-500' : 'bg-blue-500'}`}
-                  style={{ width: `${Math.min((totalDuration / (8 * 60)) * 100, 100)}%` }}
-              />
-          </div>
-          {totalHours > 8 && (
-              <p className="text-[10px] text-red-500 mt-1.5 font-medium text-right">You have exceeded the base 8h limit. Extra fees may apply.</p>
-          )}
-        </div>
-        <div className="pt-1 border-t border-slate-100">
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pt-2">
-            {categories.map(cat => {
-              const isActive = activeCategory === cat;
-              const count = cat === 'ALL' ? data.itinerary.length : data.itinerary.filter(p => p.type === cat).length;
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat as typeof activeCategory)}
-                  className={`px-3 py-2 rounded-xl text-sm font-semibold whitespace-nowrap border transition-all ${
-                    isActive ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-blue-200'
-                  }`}
-                >
-                  <span className="mr-1">{cat === 'ALL' ? 'All' : cat.toLowerCase()}</span>
-                  <span className={`text-[11px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-white text-slate-500'}`}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+      {/* Category Filters */}
+      <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 sticky top-[70px] z-30">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+          {categories.map(cat => {
+            const isActive = activeCategory === cat;
+            const count = cat === 'ALL' ? data.itinerary.length : data.itinerary.filter(p => p.type === cat).length;
+            return (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat as typeof activeCategory)}
+                className={`px-3 py-2 rounded-xl text-sm font-semibold whitespace-nowrap border transition-all ${
+                  isActive ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-blue-200'
+                }`}
+              >
+                <span className="mr-1">{cat === 'ALL' ? 'All' : cat.toLowerCase()}</span>
+                <span className={`text-[11px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-white text-slate-500'}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
