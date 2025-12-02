@@ -1,0 +1,7 @@
+{
+  "name": "DockDay - Shore Leave Booking",
+  "description": "Optimized shore leave booking platform for international crew members in China.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
