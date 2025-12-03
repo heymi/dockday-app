@@ -30,6 +30,7 @@ const BookingSummaryFooter: React.FC<FooterProps> = ({ booking, onNext, isLastSt
     .reduce((acc, s) => acc + priceFor(s.id), 0);
 
   const totalPrice = basePrice + addonsPrice;
+  const promoGroupSize = 4.5;
   const lowAsPrice = totalPrice / 4.5;
 
   const effectiveGroupSize = booking.groupSize > 0 ? booking.groupSize : 1;

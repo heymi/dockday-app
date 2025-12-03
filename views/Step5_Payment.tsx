@@ -9,13 +9,27 @@ interface Props {
 }
 
 const Step5_Payment: React.FC<Props> = ({ data, update }) => {
-    const corePrice = data.services.filter(s => s.selected).reduce((acc, curr) => acc + curr.price, 0);
-    const total = corePrice;
-    const maxGroupSize = 6; 
-    const lowestPossible = total / maxGroupSize;
+    const services = data.services || [];
+    const priceFor = (serviceId: string) => {
+      const s = services.find(x => x.id === serviceId);
+      if (!s) return 0;
+      if (s.variants && s.selectedVariantId) {
+        const v = s.variants.find(vv => vv.id === s.selectedVariantId);
+        if (v) return v.price;
+      }
+      return s.price;
+    };
+
+    const basePriceRaw = priceFor('core-8h');
+    const basePrice = Number.isFinite(basePriceRaw) && basePriceRaw > 0 ? basePriceRaw : 399;
+    const addonsPrice = services
+      .filter(s => s.selected && s.type === 'ADDON')
+      .reduce((sum, s) => sum + priceFor(s.id), 0);
+
+    const total = basePrice + addonsPrice;
+    const safeTotal = Number.isFinite(total) ? total : basePrice;
     const currentSplit = data.groupSize > 0 ? data.groupSize : 1;
-    const currentPerPerson = data.isSplitBill ? total / currentSplit : total;
-    const fiveSplit = total / 5;
+    const currentPerPerson = data.isSplitBill ? safeTotal / currentSplit : safeTotal;
 
   return (
     <div className="space-y-6 animate-fadeIn pb-32">
@@ -59,7 +73,7 @@ const Step5_Payment: React.FC<Props> = ({ data, update }) => {
           {/* Price Tiers Visual for 1-5 ppl */}
           <div className="relative h-20 flex items-end justify-between px-2 pb-4 gap-2">
             {([1, 2, 3, 4, 5] as const).map(count => {
-              const price = total / count;
+              const price = safeTotal / count;
               const height =
                 count === 1 ? 40 :
                 count === 2 ? 22 :

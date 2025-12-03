@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GripVertical, AlertTriangle, Music2, Clock, Check, MapPin, Trash2, MessageSquare } from 'lucide-react';
 import { BookingState, ServiceItem, CityPoint } from '../types';
 
@@ -32,6 +32,7 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [overTrash, setOverTrash] = useState(false);
+  const trashRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const selectedServices = useMemo(
@@ -71,7 +72,7 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
     return [...serviceItems, ...cityItems];
   }, [selectedServices, selectedCities, data.customLoungeDurationHours]);
 
-  const smartOrder = (items: CombinedItem[]) => {
+  const smartOrder = useCallback((items: CombinedItem[]) => {
     const priority = (item: CombinedItem) => {
       if (item.kind === 'SERVICE') {
         const id = item.id;
@@ -87,7 +88,7 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
       return 4; // 其它在 SPA 之后、喝酒之前
     };
     return [...items].sort((a, b) => priority(a) - priority(b)).map(i => i.id);
-  };
+  }, []);
 
   // sync serviceOrder to include all items (services + cities)
   useEffect(() => {
@@ -172,7 +173,7 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
     }
     // SERVICE
     if (item.price > 0) {
-      const ok = window.confirm('删除此付费服务？');
+      const ok = window.confirm('Delete this paid service?');
       if (!ok) return;
     }
     const updatedServices = data.services.map(s =>
@@ -216,10 +217,22 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
     const deltaX = touchStart.x - clientX;
     const deltaY = Math.abs(touchStart.y - clientY);
 
-    // swipe to delete
+    // swipe to delete (with confirm for paid services)
     if (deltaX > 60 && deltaX > deltaY) {
       const item = orderedItems.find(i => i.id === touchStart.id);
-      if (item) removeItem(item);
+      if (item) {
+        if (item.kind === 'SERVICE' && item.price > 0) {
+          const ok = window.confirm('Delete this paid service?');
+          if (!ok) {
+            setTouchStart(null);
+            setDragId(null);
+            setDragging(false);
+            setOverTrash(false);
+            return;
+          }
+        }
+        removeItem(item);
+      }
       setTouchStart(null);
       setDragId(null);
       setDragging(false);
@@ -241,9 +254,31 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
       }
     });
     if (nearestId) setDragOverId(nearestId);
+
+    // check trash hit for touch
+    if (trashRef.current) {
+      const rect = trashRef.current.getBoundingClientRect();
+      const within =
+        clientX >= rect.left &&
+        clientX <= rect.right &&
+        clientY >= rect.top &&
+        clientY <= rect.bottom;
+      setOverTrash(within);
+    }
   };
 
   const handleTouchEnd = () => {
+    if (overTrash && dragId) {
+      const item = orderedItems.find(i => i.id === dragId);
+      if (item) removeItem(item);
+      setOverTrash(false);
+      setDragId(null);
+      setDragOverId(null);
+      setDragging(false);
+      setTouchStart(null);
+      return;
+    }
+
     if (dragId && dragOverId && dragId !== dragOverId) {
       handleDrop(dragOverId);
     } else {
@@ -339,6 +374,7 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
               e.preventDefault();
               handleDragOver(item.id);
             }}
+            style={dragging ? { touchAction: 'none' } : undefined}
           >
             <div className="flex flex-col items-center gap-2 pt-1 text-slate-400 min-w-[28px]">
               <div className="w-6 h-6 rounded-full bg-blue-50 text-blue-700 text-xs font-bold flex items-center justify-center">
@@ -414,6 +450,7 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
       {dragging && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50">
           <div
+            ref={trashRef}
             className={`w-14 h-14 rounded-full border-2 flex items-center justify-center shadow-lg transition-all ${
               overTrash ? 'bg-red-100 border-red-400 text-red-600 scale-110' : 'bg-white border-slate-300 text-slate-500'
             }`}
@@ -430,6 +467,25 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
                 if (item) removeItem(item);
               }
               setDragging(false);
+              setDragId(null);
+              setDragOverId(null);
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              setOverTrash(true);
+            }}
+            onTouchMove={(e) => {
+              e.preventDefault();
+              setOverTrash(true);
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              if (dragId) {
+                const item = orderedItems.find(i => i.id === dragId);
+                if (item) removeItem(item);
+              }
+              setDragging(false);
+              setOverTrash(false);
               setDragId(null);
               setDragOverId(null);
             }}
