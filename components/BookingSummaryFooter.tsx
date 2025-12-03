@@ -14,16 +14,27 @@ interface FooterProps {
 }
 
 const BookingSummaryFooter: React.FC<FooterProps> = ({ booking, onNext, isLastStep, choiceButtons }) => {
-  // Calculate Total
-  const corePrice = booking.services.filter(s => s.selected).reduce((acc, curr) => acc + curr.price, 0);
-  const totalPrice = corePrice;
-  const promoGroupSize = 4;
-  const lowAsPrice = totalPrice / promoGroupSize;
-  
-  // Calculate Per Person
+  const priceFor = (serviceId: string) => {
+    const service = booking.services.find(s => s.id === serviceId);
+    if (!service) return 0;
+    if (service.variants && service.selectedVariantId) {
+      const variant = service.variants.find(v => v.id === service.selectedVariantId);
+      if (variant) return variant.price;
+    }
+    return service.price;
+  };
+
+  const basePrice = priceFor('core-8h');
+  const addonsPrice = booking.services
+    .filter(s => s.selected && s.type === 'ADDON')
+    .reduce((acc, s) => acc + priceFor(s.id), 0);
+
+  const totalPrice = basePrice + addonsPrice;
+  const lowAsPrice = totalPrice / 4.5;
+
   const effectiveGroupSize = booking.groupSize > 0 ? booking.groupSize : 1;
   const perPersonPrice = totalPrice / effectiveGroupSize;
-  const displayedSplitPrice = Math.max(perPersonPrice, 120);
+  const displayedSplitPrice = lowAsPrice;
 
   // Determine Button Text
   let buttonText = 'Continue';
@@ -83,7 +94,7 @@ const BookingSummaryFooter: React.FC<FooterProps> = ({ booking, onNext, isLastSt
               
               <div className="flex items-baseline gap-1">
                 <span className="text-2xl font-bold text-slate-900">
-                  ${booking.isSplitBill ? perPersonPrice.toFixed(2) : lowAsPrice.toFixed(2)}
+                  ${booking.isSplitBill ? lowAsPrice.toFixed(2) : lowAsPrice.toFixed(2)}
                 </span>
                 {booking.isSplitBill && (
                   <span className="text-xs text-slate-400 font-medium">/ person</span>

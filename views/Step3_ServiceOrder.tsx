@@ -8,10 +8,10 @@ interface Props {
 }
 
 const LOUNGE_PRESETS = [
-  { label: '3小时', hours: 3 },
-  { label: '4小时', hours: 4 },
-  { label: '5小时', hours: 5 },
-  { label: '全程', hours: 8 },
+  { label: '3 hours', hours: 3 },
+  { label: '4 hours', hours: 4 },
+  { label: '5 hours', hours: 5 },
+  { label: 'Full trip', hours: 8 },
 ];
 const WARNING_THRESHOLD_MIN = 420; // 7 hours
 const BASE_AVAILABLE_MIN = 8 * 60 - 90; // 8h - 1.5h transit
@@ -125,7 +125,7 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
   const usageColor =
     usageRatio >= 0.95 ? 'bg-red-500' : usageRatio >= 0.85 ? 'bg-amber-400' : 'bg-green-500';
   const usageLabel =
-    usageRatio >= 0.95 ? '糟糕 😱' : usageRatio >= 0.85 ? '紧张 😬' : '宽裕 🙂';
+    usageRatio >= 0.95 ? 'Critical 😱' : usageRatio >= 0.85 ? 'Tight 😬' : 'Plenty 🙂';
 
   const handleDragStart = (id: string) => {
     setDragId(id);
@@ -259,27 +259,27 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
     <div className="space-y-6 animate-fadeIn pb-24">
       <div className="space-y-2">
         <h2 className="text-2xl font-bold text-slate-900">Plan Service Order</h2>
-        <p className="text-slate-500 text-sm">拖拽调整服务顺序。若选择了酒吧包间，可单独设置时长（最多 6 小时）。</p>
+        <p className="text-slate-500 text-sm">Drag to reorder services. Lounge duration can be adjusted (up to 6 hours).</p>
         <button
           type="button"
           onClick={() => update({ serviceOrder: smartOrder(combinedItems) })}
           className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
         >
-          智能排序
+          Smart Sort
         </button>
         <div className="bg-white border border-slate-200 rounded-xl px-3 py-3 text-sm shadow-sm space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-slate-600">可用总时长</span>
+            <span className="text-slate-600">Available time</span>
             <div className="text-right">
-              <div className="text-base font-bold text-blue-700">{(availableMinutes / 60).toFixed(1)} 小时</div>
+              <div className="text-base font-bold text-blue-700">{(availableMinutes / 60).toFixed(1)} h</div>
               <div className="text-[11px] text-slate-400">
-                8h - 1.5h 往返 {serviceExtensionHours > 0 ? `+ ${serviceExtensionHours}h 延长` : ''}
+                8h - 1.5h transit {serviceExtensionHours > 0 ? `+ ${serviceExtensionHours}h extension` : ''}
               </div>
             </div>
           </div>
           <div>
             <div className="flex justify-between text-[11px] text-slate-500 mb-1">
-              <span>当前：{(totalMinutes / 60).toFixed(1)}h</span>
+              <span>Current: {(totalMinutes / 60).toFixed(1)}h</span>
               <span className="font-semibold text-slate-700">{usageLabel}</span>
             </div>
             <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
@@ -296,7 +296,7 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
         <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-3 flex items-start gap-2">
           <AlertTriangle size={18} className="mt-0.5" />
           <p className="text-xs leading-relaxed">
-            当前服务总时长过于紧张，请删除一些项目或减少时长，以避免额外加时费用。
+            Current schedule is too tight. Remove or shorten services to avoid extra overtime fees.
           </p>
         </div>
       )}
@@ -367,8 +367,8 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between text-xs font-semibold text-slate-700">
-                      <span>包间时长</span>
-                      <span>{loungeDuration} 小时</span>
+                      <span>Lounge duration</span>
+                      <span>{loungeDuration} hours</span>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {LOUNGE_PRESETS.map(preset => {
@@ -389,10 +389,10 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
                         );
                       })}
                     </div>
-                    <div className="text-[11px] text-slate-500 mt-1">全程=下船直去，结束后直接返船。</div>
-                  </div>
-                </div>
-              )}
+                    <div className="text-[11px] text-slate-500 mt-1">Full trip = straight from port to lounge, return directly.</div>
+              </div>
+            </div>
+          )}
             </div>
           </div>
         ))}
@@ -405,7 +405,7 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
           <h3 className="font-semibold text-slate-900 text-sm">Special Requests / Notes</h3>
         </div>
         <textarea
-          placeholder="填写过敏、饮食偏好、接送说明或其他特殊需求..."
+          placeholder="Share allergies, dietary needs, pickup notes, or other special requests..."
           className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all min-h-[90px] resize-none text-sm leading-relaxed"
           value={data.notes}
           onChange={(e) => update({ notes: e.target.value })}
