@@ -9,6 +9,7 @@ import Step3_ServiceOrder from './views/Step3_ServiceOrder';
 import Step3_Itinerary from './views/Step3_Itinerary';
 import Step4_Review from './views/Step4_Review';
 import Step5_Payment from './views/Step5_Payment';
+import { useEffect } from 'react';
 
 const App: React.FC = () => {
   // --- State ---
@@ -48,6 +49,11 @@ const App: React.FC = () => {
   const prevStep = () => {
     if (currentStep > 0) setCurrentStep(c => c - 1);
   };
+
+  // Scroll to top on step change to avoid carrying over previous scroll position
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [currentStep]);
 
   // --- Render Steps ---
   const renderStep = () => {
