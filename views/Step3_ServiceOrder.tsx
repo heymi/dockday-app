@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { GripVertical, AlertTriangle, Music2, Clock, Check, MapPin, Trash2, MessageSquare } from 'lucide-react';
 import { BookingState, ServiceItem, CityPoint } from '../types';
 
@@ -28,10 +28,11 @@ type CombinedItem = {
 
 const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
   const [dragId, setDragId] = useState<string | null>(null);
-  const [touchStart, setTouchStart] = useState<{ id: string; x: number } | null>(null);
+  const [touchStart, setTouchStart] = useState<{ id: string; x: number; y: number } | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [overTrash, setOverTrash] = useState(false);
+  const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const selectedServices = useMemo(
     () => data.services.filter(s => s.selected && s.type !== 'CORE' && s.id !== 'addon-ext'),
@@ -203,12 +204,53 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
     }
   }, [data.customLoungeDurationHours, orderedItems, data.services, data.itinerary, update]);
 
-  const handleTouchStart = (id: string, clientX: number) => setTouchStart({ id, x: clientX });
-  const handleTouchEnd = (id: string, clientX: number, item: CombinedItem) => {
-    if (!touchStart || touchStart.id !== id) return;
-    const delta = touchStart.x - clientX;
-    if (delta > 50) {
-      removeItem(item);
+  const handleTouchStart = (id: string, clientX: number, clientY: number) => {
+    setTouchStart({ id, x: clientX, y: clientY });
+    setDragId(id);
+    setDragOverId(id);
+    setDragging(true);
+  };
+
+  const handleTouchMove = (clientX: number, clientY: number) => {
+    if (!touchStart) return;
+    const deltaX = touchStart.x - clientX;
+    const deltaY = Math.abs(touchStart.y - clientY);
+
+    // swipe to delete
+    if (deltaX > 60 && deltaX > deltaY) {
+      const item = orderedItems.find(i => i.id === touchStart.id);
+      if (item) removeItem(item);
+      setTouchStart(null);
+      setDragId(null);
+      setDragging(false);
+      setOverTrash(false);
+      return;
+    }
+
+    // reorder: find nearest item by Y
+    let nearestId: string | null = null;
+    let nearestDist = Number.MAX_VALUE;
+    Object.entries(itemRefs.current).forEach(([id, el]) => {
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const centerY = rect.top + rect.height / 2;
+      const dist = Math.abs(centerY - clientY);
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearestId = id;
+      }
+    });
+    if (nearestId) setDragOverId(nearestId);
+  };
+
+  const handleTouchEnd = () => {
+    if (dragId && dragOverId && dragId !== dragOverId) {
+      handleDrop(dragOverId);
+    } else {
+      setDragId(null);
+      setDragOverId(null);
+      setDragging(false);
+      setOverTrash(false);
     }
     setTouchStart(null);
   };
@@ -264,6 +306,7 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
           <div
             key={item.id}
             draggable
+            ref={(el) => { itemRefs.current[item.id] = el; }}
             onDragStart={() => handleDragStart(item.id)}
             onDragOver={(e) => {
               e.preventDefault();
@@ -279,8 +322,12 @@ const Step3_ServiceOrder: React.FC<Props> = ({ data, update }) => {
               setDragging(false);
               setOverTrash(false);
             }}
-            onTouchStart={(e) => handleTouchStart(item.id, e.touches[0].clientX)}
-            onTouchEnd={(e) => handleTouchEnd(item.id, e.changedTouches[0].clientX, item)}
+            onTouchStart={(e) => handleTouchStart(item.id, e.touches[0].clientX, e.touches[0].clientY)}
+            onTouchMove={(e) => {
+              e.preventDefault();
+              handleTouchMove(e.touches[0].clientX, e.touches[0].clientY);
+            }}
+            onTouchEnd={handleTouchEnd}
             className={`bg-white border rounded-2xl p-3 flex items-start gap-3 shadow-sm cursor-grab active:cursor-grabbing transition-all ${
               dragId === item.id
                 ? 'border-blue-400 shadow-blue-100 ring-2 ring-blue-100'

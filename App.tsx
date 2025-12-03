@@ -7,7 +7,7 @@ import Step1_TripDetails from './views/Step1_TripDetails';
 import Step2_Services from './views/Step2_Services';
 import Step3_ServiceOrder from './views/Step3_ServiceOrder';
 import Step3_Itinerary from './views/Step3_Itinerary';
-import Step4_CrewInfo from './views/Step4_CrewInfo';
+import Step4_Review from './views/Step4_Review';
 import Step5_Payment from './views/Step5_Payment';
 
 const App: React.FC = () => {
@@ -35,6 +35,11 @@ const App: React.FC = () => {
     setBookingData(prev => ({ ...prev, ...fields }));
   };
 
+  const goToPayment = (split: boolean) => {
+    setBookingData(prev => ({ ...prev, isSplitBill: split }));
+    setCurrentStep(5);
+  };
+
   const nextStep = () => {
     if (currentStep < 5) setCurrentStep(c => c + 1);
     else alert('Processing Authorization...');
@@ -51,7 +56,7 @@ const App: React.FC = () => {
       case 1: return <Step2_Services data={bookingData} update={updateData} />;
       case 2: return <Step3_Itinerary data={bookingData} update={updateData} />;
       case 3: return <Step3_ServiceOrder data={bookingData} update={updateData} />;
-      case 4: return <Step4_CrewInfo data={bookingData} update={updateData} />;
+      case 4: return <Step4_Review data={bookingData} />;
       case 5: return <Step5_Payment data={bookingData} update={updateData} />;
       default: return null;
     }
@@ -73,6 +78,10 @@ const App: React.FC = () => {
         booking={bookingData} 
         onNext={nextStep} 
         isLastStep={currentStep === 5}
+        choiceButtons={currentStep === 4 ? {
+          left: { label: 'Split with Friends', onClick: () => goToPayment(true) },
+          right: { label: 'Travel Solo', onClick: () => goToPayment(false) }
+        } : undefined}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { MapPin, Clock, Plus, Check } from 'lucide-react';
+import { MapPin, Clock, Plus, Check, Info } from 'lucide-react';
 import { BookingState, CityPoint } from '../types';
 
 interface Props {
@@ -36,7 +36,7 @@ const Step3_Itinerary: React.FC<Props> = ({ data, update }) => {
     <div className="space-y-6 animate-fadeIn pb-24">
        <div className="space-y-2">
         <h2 className="text-2xl font-bold text-slate-900">Plan Your Route</h2>
-        <p className="text-slate-500 text-sm">Select destinations to build your perfect day out.</p>
+        <p className="text-slate-500 text-sm">Add optional self-pay stops; paid services will be prioritized.</p>
       </div>
 
       {/* Category Filters */}
@@ -60,6 +60,15 @@ const Step3_Itinerary: React.FC<Props> = ({ data, update }) => {
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* Info Banner */}
+      <div className="bg-blue-50 border border-blue-100 text-blue-800 rounded-2xl p-3 text-sm flex items-start gap-2">
+        <Info size={16} className="mt-0.5 text-blue-500" />
+        <div className="space-y-1">
+          <p className="font-semibold text-sm">Paid services first</p>
+          <p className="text-xs text-blue-700">These stops are optional and self-pay on-site; we arrange them only if time allows after completing paid services.</p>
         </div>
       </div>
 
@@ -94,6 +103,7 @@ const Step3_Itinerary: React.FC<Props> = ({ data, update }) => {
                                 <Clock size={12} />
                                 <span>~{point.duration} min</span>
                             </div>
+                            <p className="text-[11px] text-white/80 mt-1">Optional stop · self-pay on site</p>
                         </div>
 
                         {/* Action Button */}

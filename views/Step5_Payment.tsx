@@ -159,35 +159,8 @@ const Step5_Payment: React.FC<Props> = ({ data, update }) => {
                       </div>
                   </div>
               </div>
-          </div>
-      )}
-
-      {/* ORDER SUMMARY */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 space-y-3">
-        <h3 className="font-semibold text-slate-900 border-b border-slate-100 pb-2">Booking Summary</h3>
-        <div className="space-y-2 text-sm">
-            <div className="flex justify-between text-slate-600">
-                <span>Date</span>
-                <span className="font-medium text-slate-900">{data.date ? new Date(data.date).toLocaleDateString() : 'Not selected'}</span>
-            </div>
-            <div className="flex justify-between text-slate-600">
-                <span>Port</span>
-                <span className="font-medium text-slate-900">{data.port || 'Not selected'}</span>
-            </div>
-            <div className="flex justify-between text-slate-600">
-                <span>Vessel</span>
-                <span className="font-medium text-slate-900">{data.vesselName || 'Not selected'}</span>
-            </div>
-            <div className="flex justify-between text-slate-600">
-                <span>MMSI</span>
-                <span className="font-medium text-slate-900">{data.mmsi || 'Not provided'}</span>
-            </div>
-            <div className="flex justify-between text-slate-600">
-                <span>Services</span>
-                <span className="font-medium text-slate-900">{data.services.filter(s => s.selected).length} items</span>
-            </div>
-        </div>
       </div>
+      )}
 
       {/* PAYMENT FORM */}
       <div className="space-y-4">
