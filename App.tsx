@@ -30,6 +30,7 @@ const App: React.FC = () => {
     serviceOrder: INITIAL_SERVICES.filter(s => s.selected && s.type !== 'CORE').map(s => s.id),
     customLoungeDurationHours: 3
   });
+  const [showTimelineView, setShowTimelineView] = useState(false);
 
   // --- Handlers ---
   const updateData = (fields: Partial<BookingState>) => {
@@ -62,7 +63,7 @@ const App: React.FC = () => {
       case 1: return <Step2_Services data={bookingData} update={updateData} />;
       case 2: return <Step3_Itinerary data={bookingData} update={updateData} />;
       case 3: return <Step3_ServiceOrder data={bookingData} update={updateData} />;
-      case 4: return <Step4_Review data={bookingData} />;
+      case 4: return <Step4_Review data={bookingData} showTimeline={showTimelineView} setShowTimeline={setShowTimelineView} />;
       case 5: return <Step5_Payment data={bookingData} update={updateData} />;
       default: return null;
     }
@@ -80,15 +81,17 @@ const App: React.FC = () => {
         {renderStep()}
       </main>
 
-      <BookingSummaryFooter 
-        booking={bookingData} 
-        onNext={nextStep} 
-        isLastStep={currentStep === 5}
-        choiceButtons={currentStep === 4 ? {
-          left: { label: 'Split with Friends', onClick: () => goToPayment(true) },
-          right: { label: 'Travel Solo', onClick: () => goToPayment(false) }
-        } : undefined}
-      />
+      {!showTimelineView && (
+        <BookingSummaryFooter 
+          booking={bookingData} 
+          onNext={nextStep} 
+          isLastStep={currentStep === 5}
+          choiceButtons={currentStep === 4 ? {
+            left: { label: 'Split with Friends', onClick: () => goToPayment(true) },
+            right: { label: 'Travel Solo', onClick: () => goToPayment(false) }
+          } : undefined}
+        />
+      )}
     </div>
   );
 };
