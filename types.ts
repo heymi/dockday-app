@@ -45,6 +45,7 @@ export interface BookingState {
   mmsi: string;
   groupSize: number;
   isSplitBill: boolean;
+  selectedPackageHours?: number;
   services: ServiceItem[];
   itinerary: CityPoint[];
   crewName: string;
