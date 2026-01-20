@@ -9,6 +9,7 @@ interface Props {
 
 const Step1_TripDetails: React.FC<Props> = ({ data, update }) => {
   const coreService = data.services.find(s => s.id === 'core-8h');
+  const isTripPackage = data.selectedPackageId === 'trip';
   const detailsRef = useRef<HTMLDivElement | null>(null);
   const [openDetail, setOpenDetail] = useState<number | null>(null);
   const [showDateModal, setShowDateModal] = useState(false);
@@ -25,6 +26,13 @@ const Step1_TripDetails: React.FC<Props> = ({ data, update }) => {
     { label: 'Optional Lounge, Dining & Spa', icon: Martini },
     { label: 'Essential Daily Supplies Stop', icon: Infinity },
     { label: 'Border inspection available until 24:00, with smooth and delay-free processing', icon: ShieldCheck, fullWidth: true },
+  ];
+  const tripFeatures = [
+    { label: 'From $15 per one-way trip', icon: Car },
+    { label: 'Up to 30 km per trip', icon: BadgeCheck },
+    { label: 'Extra destinations billed as new trips', icon: Infinity },
+    { label: '$200 pre-authorization or offline deposit', icon: Wallet },
+    { label: 'Final charges settled after service', icon: ShieldCheck, fullWidth: true },
   ];
 
   const serviceDetails = [
@@ -53,6 +61,29 @@ const Step1_TripDetails: React.FC<Props> = ({ data, update }) => {
       body: 'Crew must return to the port before 24:00 (midnight) per border regulations. Timing may adjust based on immigration and port conditions.'
     },
   ];
+  const tripServiceDetails = [
+    {
+      title: 'Trip Pricing',
+      body: '$15 per one-way trip within 30 km. • Each additional destination counts as a new trip at the same rate.'
+    },
+    {
+      title: 'Deposit / Pre-Auth',
+      body: 'A $200 pre-authorization or offline deposit is required before service. • Unused hold is released after final settlement.'
+    },
+    {
+      title: 'Settlement',
+      body: 'Final charges are calculated after service based on completed trips. • Any difference is settled immediately after the trip ends.'
+    },
+    {
+      title: 'Vehicle & Escort',
+      body: 'Vehicle type (van or sedan) is arranged based on group size. • Bilingual escort is available for basic coordination.'
+    },
+    {
+      title: 'Return-to-Vessel',
+      body: 'Crew must return to the port before 24:00 (midnight) per border regulations. • Timing may adjust based on immigration and port conditions.'
+    },
+  ];
+  const activeServiceDetails = isTripPackage ? tripServiceDetails : serviceDetails;
 
   return (
     <div className="space-y-6 animate-fadeIn pb-10">
@@ -62,47 +93,65 @@ const Step1_TripDetails: React.FC<Props> = ({ data, update }) => {
       </div>
 
       {/* Core Service Overview */}
-      {coreService && (
-        <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl text-white p-5 shadow-lg">
+      {(coreService || isTripPackage) && (
+        <div className={`relative overflow-hidden rounded-2xl text-white p-5 shadow-lg ${isTripPackage ? 'bg-gradient-to-br from-emerald-900 to-emerald-800' : 'bg-gradient-to-br from-slate-900 to-slate-800'}`}>
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <Car size={100} />
           </div>
           <div className="relative z-10 space-y-2">
             <div className="flex justify-between items-start">
               <div className="flex flex-col gap-1">
-                <span className="bg-blue-500/20 text-blue-200 border border-blue-500/30 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider inline-flex w-fit">
-                  Included Service
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider inline-flex w-fit ${isTripPackage ? 'bg-emerald-500/20 text-emerald-100 border border-emerald-500/40' : 'bg-blue-500/20 text-blue-200 border border-blue-500/30'}`}>
+                  {isTripPackage ? 'Point-to-Point Metered' : 'Included Service'}
                 </span>
               </div>
               <div className="text-right leading-tight">
-                <div className="text-2xl font-bold text-white">${coreService.price}</div>
-                <div className="text-[11px] text-white/80 font-medium">$99.75 / person</div>
+                {isTripPackage ? (
+                  <>
+                    <div className="text-2xl font-bold text-white">$15</div>
+                    <div className="text-[11px] text-white/80 font-medium">per trip · up to 30 km</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold text-white">${coreService?.price}</div>
+                    <div className="text-[11px] text-white/80 font-medium">$99.75 / person</div>
+                  </>
+                )}
               </div>
             </div>
-            <h3 className="text-xl font-bold">{coreService.title}</h3>
-            <p className="text-slate-200/90 text-sm leading-relaxed">
-              {coreService.description}
-              <button
-                type="button"
-                onClick={() => detailsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                className="ml-2 text-[11px] text-blue-200 underline underline-offset-4 decoration-white/40 hover:text-white transition-colors"
-              >
-                More details
-              </button>
-            </p>
+            <h3 className="text-xl font-bold">{isTripPackage ? 'Flexible One-Way Trips' : coreService?.title}</h3>
+            {isTripPackage ? (
+              <p className="text-emerald-100/90 text-sm leading-relaxed">
+                $15 per trip (up to 30 km). Additional destinations repeat the same pricing. A $200 pre-authorization
+                or offline deposit is required, and final settlement happens after service.
+              </p>
+            ) : (
+              <p className="text-slate-200/90 text-sm leading-relaxed">
+                {coreService?.description}
+                <button
+                  type="button"
+                  onClick={() => detailsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                  className="ml-2 text-[11px] text-blue-200 underline underline-offset-4 decoration-white/40 hover:text-white transition-colors"
+                >
+                  More details
+                </button>
+              </p>
+            )}
             <div className="grid grid-cols-2 gap-3 mt-2">
-              {coreFeatures.map((item, i) => {
+              {(isTripPackage ? tripFeatures : coreFeatures).map((item, i) => {
                 const highlight = i < 6;
                 return (
                   <div
                     key={i}
                     className={`flex items-center gap-3 rounded-2xl px-3 py-3 text-sm shadow-sm ${item.fullWidth ? 'col-span-2' : ''} ${
                       highlight
-                        ? 'bg-blue-500/15 border border-blue-200 text-white shadow-blue-900/20'
+                        ? isTripPackage
+                          ? 'bg-emerald-500/20 border border-emerald-200/30 text-white shadow-emerald-900/20'
+                          : 'bg-blue-500/15 border border-blue-200 text-white shadow-blue-900/20'
                         : 'bg-white/10 border border-white/10 text-white/90'
                     }`}
                   >
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${highlight ? 'bg-blue-500/30' : 'bg-white/15'} text-white`}>
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${highlight ? (isTripPackage ? 'bg-emerald-500/30' : 'bg-blue-500/30') : 'bg-white/15'} text-white`}>
                       <item.icon size={18} />
                     </div>
                     <span className="leading-snug">{item.label}</span>
@@ -201,7 +250,7 @@ const Step1_TripDetails: React.FC<Props> = ({ data, update }) => {
           <span className="text-[10px] text-slate-400 uppercase tracking-wide">Tap to expand</span>
         </div>
         <div className="divide-y divide-slate-100">
-          {serviceDetails.map((item, idx) => {
+          {activeServiceDetails.map((item, idx) => {
             const isOpen = openDetail === idx;
             return (
               <div key={item.title}>
