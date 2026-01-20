@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Calendar, Anchor, Ship, Info, MapPin, ListChecks, CreditCard, StickyNote, Clock, Users, ChevronRight, X } from 'lucide-react';
+import { Calendar, Anchor, Ship, Info, MapPin, ListChecks, CreditCard, StickyNote, Clock, Users, ChevronRight, X, ShieldCheck } from 'lucide-react';
 import { BookingState } from '../types';
 
 interface Props {
@@ -9,7 +9,10 @@ interface Props {
 }
 
 const Step4_Review: React.FC<Props> = ({ data, showTimeline, setShowTimeline }) => {
-  const selectedServices = data.services.filter(s => s.selected);
+  const isTripPackage = data.selectedPackageId === 'trip';
+  const tripBaseRate = 15;
+  const tripHoldAmount = 200;
+  const selectedServices = data.services.filter(s => s.selected && (!isTripPackage || s.type !== 'CORE'));
   const selectedCities = data.itinerary.filter(c => c.selected);
   const servicesTotal = selectedServices.reduce((sum, s) => sum + s.price, 0);
   const perPerson = data.isSplitBill && data.groupSize > 0 ? servicesTotal / data.groupSize : servicesTotal;
@@ -284,6 +287,39 @@ const Step4_Review: React.FC<Props> = ({ data, showTimeline, setShowTimeline }) 
         <p className="text-sm text-slate-700 whitespace-pre-line">{data.notes || 'None'}</p>
       </div>
 
+      <div className={`rounded-2xl border shadow-sm p-4 space-y-2 ${isTripPackage ? 'bg-emerald-50/60 border-emerald-200' : 'bg-white border-slate-100'}`}>
+        <div className="flex items-center gap-2">
+          <ShieldCheck size={18} className={isTripPackage ? 'text-emerald-600' : 'text-blue-600'} />
+          <h3 className="font-semibold text-slate-900 text-sm">Package & Settlement Rules</h3>
+        </div>
+        {isTripPackage ? (
+          <div className="text-sm text-slate-700 space-y-2">
+            <div className="font-semibold text-slate-900">Point-to-Point Metered</div>
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="px-2 py-1 rounded-full bg-white text-emerald-700 border border-emerald-200 font-semibold">From $15 / trip</span>
+              <span className="px-2 py-1 rounded-full bg-white text-emerald-700 border border-emerald-200 font-semibold">Up to 30 km each trip</span>
+            </div>
+            <div className="rounded-xl border border-emerald-200 bg-white p-3 space-y-1">
+              <div className="font-semibold text-slate-900 text-xs uppercase tracking-wide">Settlement Rules</div>
+              <ul className="text-xs text-slate-600 space-y-1">
+                <li>• $15 per one-way trip, each trip capped at 30 km.</li>
+                <li>• Extra destinations are charged as new trips at the same rate.</li>
+                <li>• $200 pre-authorization or offline deposit is required.</li>
+                <li>• Final charges are settled after the service ends.</li>
+              </ul>
+            </div>
+          </div>
+        ) : (
+          <div className="text-sm text-slate-600">
+            {data.selectedPackageId === '4h'
+              ? '4-Hour Express'
+              : data.selectedPackageId === '8h'
+              ? '8-Hour Full Service Deluxe'
+              : 'Package not selected'}
+          </div>
+        )}
+      </div>
+
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
@@ -301,15 +337,31 @@ const Step4_Review: React.FC<Props> = ({ data, showTimeline, setShowTimeline }) 
               <span className="font-semibold">${s.price.toFixed(2)}</span>
             </div>
           ))}
-          <div className="border-t border-slate-100 pt-2 flex justify-between text-slate-900 font-bold">
-            <span>Total</span>
-            <span>${servicesTotal.toFixed(2)}</span>
-          </div>
-          {data.isSplitBill && (
-            <div className="flex justify-between text-xs text-slate-500">
-              <span>Per person</span>
-              <span className="font-semibold text-slate-900">${perPerson.toFixed(2)}</span>
+          {isTripPackage ? (
+            <div className="border-t border-slate-100 pt-2 text-slate-600 space-y-1">
+              <div className="flex justify-between text-slate-900 font-bold">
+                <span>Transport fee</span>
+                <span>From ${tripBaseRate}/trip</span>
+              </div>
+              <div className="flex justify-between text-xs text-slate-500">
+                <span>Pre-authorization hold</span>
+                <span className="font-semibold text-slate-900">${tripHoldAmount}</span>
+              </div>
+              <div className="text-xs text-slate-500">Final charge is settled after service completion.</div>
             </div>
+          ) : (
+            <>
+              <div className="border-t border-slate-100 pt-2 flex justify-between text-slate-900 font-bold">
+                <span>Total</span>
+                <span>${servicesTotal.toFixed(2)}</span>
+              </div>
+              {data.isSplitBill && (
+                <div className="flex justify-between text-xs text-slate-500">
+                  <span>Per person</span>
+                  <span className="font-semibold text-slate-900">${perPerson.toFixed(2)}</span>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

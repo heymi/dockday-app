@@ -45,7 +45,8 @@ export interface BookingState {
   mmsi: string;
   groupSize: number;
   isSplitBill: boolean;
-  selectedPackageHours?: number;
+  selectedPackageId?: '4h' | '8h' | 'trip' | 'shift';
+  paymentHoldMethod?: 'preauth' | 'offline';
   services: ServiceItem[];
   itinerary: CityPoint[];
   crewName: string;
@@ -53,6 +54,37 @@ export interface BookingState {
   notes: string;
   serviceOrder: string[];
   customLoungeDurationHours: number;
+
+  // Shift-change / agent booking (local MVP)
+  agentContactType?: 'phone' | 'email';
+  agentContactValue?: string;
+  agentVerified?: boolean;
+  carCount?: number;
+  transferType?: 'airport' | 'port';
+  transferDateTime?: string; // ISO string or datetime-local value
+  airportFlightNumber?: string;
+  portVesselName?: string;
+  portVesselNumber?: string;
+  crewNationalities?: string[];
+  contactName?: string;
+  contactPhone?: string;
+  pickupPoint?: string;
+  pickupIdentifier?: string;
+  pickupTerminal?: string;
+  pickupGate?: string;
+  destination?: string;
+  destinationType?: 'hotel' | 'port' | 'other';
+  luggageNotes?: string;
+  specialRequests?: string;
+  needHotel?: boolean;
+  hotelName?: string;
+  hotelNights?: number;
+  needMeal?: boolean;
+  mealPlan?: 'standard' | 'premium';
+  mealCount?: number;
+  agencyCompanyId?: string;
+  billingAccountId?: string;
+  billingTermsAccepted?: boolean;
 }
 
 export const PORTS = [
